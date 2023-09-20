@@ -20,6 +20,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install GitVersion
+        # Problem: this doesn't seem to work if the branch is reused without being rebased.
         uses: gittools/actions/gitversion/setup@v0
         with:
           versionSpec: '5.12.0'
