@@ -10,7 +10,7 @@ jobs:
     steps:
       # From https://docs.github.com/en/actions/using-jobs/defining-outputs-for-jobs#example-defining-outputs-for-a-job
       - id: step1
-        run: echo "version=1.0.2" >> "$GITHUB_OUTPUT"
+        run: echo "version=1.0.3" >> "$GITHUB_OUTPUT"
     outputs:
       version: ${{ steps.step1.outputs.version }}
       release: v${{ steps.step1.outputs.version }}
