@@ -1,0 +1,88 @@
+name: Test npm lint, test, publish, release
+on: push
+env:
+  NODE_VERSION: 18
+jobs:
+
+  calculate_version:
+    name: Calculate version
+    runs-on: ubuntu-latest
+    steps:
+      # From https://docs.github.com/en/actions/using-jobs/defining-outputs-for-jobs#example-defining-outputs-for-a-job
+      - id: step1
+        run: echo "version=1.0.2" >> "$GITHUB_OUTPUT"
+    outputs:
+      version: ${{ steps.step1.outputs.version }}
+      release: v${{ steps.step1.outputs.version }}
+
+  lint:
+    name: Run lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+      - name: Setup Node.js ${{ env.NODE_VERSION }} Environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+          registry-url: https://npm.pkg.github.com/
+      - run: npm ci
+      - run: npm run lint
+
+  run-tests:
+    name: Run tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+      - name: Setup Node.js ${{ env.NODE_VERSION }} Environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+          registry-url: https://npm.pkg.github.com/
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test
+      - run: npm run test:coverage
+
+  build-package:
+    name: Build and publish
+    needs: [calculate_version, lint, run-tests]
+    runs-on: ubuntu-latest
+    permissions:
+      #contents: read
+      # To be able to create release
+      contents: write
+      # To be able to publish package
+      packages: write
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+      - name: Setup Node.js ${{ env.NODE_VERSION }} Environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+          registry-url: https://npm.pkg.github.com/
+      - run: npm --no-git-tag-version version ${{ needs.calculate_version.outputs.version }}
+      - run: npm ci
+      - run: npm run build
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        if: github.ref_name == 'main'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: Release ${{ needs.calculate_version.outputs.release }}
+          tag_name: ${{ needs.calculate_version.outputs.version }}
