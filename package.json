@@ -1,0 +1,14 @@
+{
+  "name": "@gmzwinge490/test-publish-release",
+  "version": "0.0.0-SEMANTIC-RELEASE",
+  "description": "Test npm publish and create release",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo TODO: specify build script",
+    "lint": "echo TODO: specify lint script",
+    "test": "echo TODO: specify test script",
+    "test:coverage": "echo TODO: specify test:coverage script"
+  },
+  "author": "",
+  "license": "ISC"
+}
