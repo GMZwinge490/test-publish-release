@@ -113,9 +113,12 @@ jobs:
     needs: [calculate_version, lint, run-tests]
     runs-on: ubuntu-latest
     permissions:
+      # To be able to "read" release
       #contents: read
       # To be able to create release
       contents: write
+      # To be able to download package
+      #packages: read
       # To be able to publish package
       packages: write
 
@@ -133,6 +136,16 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm publish
+        # This publishes package in
+        #    https://github.com/GMZwinge490/test-publish-release/pkgs/npm/test-publish-release/versions
+        # where they can be deleted.
+        # This doesn't seem to work in https://github.com/Rockwell-Automation-FTDS/dependabot-test/edit/main/.github/workflows/ci.yaml.
+        # If `packages:` above is set to `read`, GITHUB_TOKEN gives this error:
+        #    npm ERR! 403 403 Forbidden - PUT https://npm.pkg.github.com/@rockwell-automation-ftds%2fdependabot-test
+        #      - Permission installation not allowed to Write organization package
+        # If `packages:` above is set to `read`, GITHUB_TOKEN gives this error:
+        #    npm ERR! 403 403 Forbidden - PUT https://npm.pkg.github.com/@rockwell-automation-ftds%2fdependabot-test
+        #      - Permission permission_denied: write_package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Release
