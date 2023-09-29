@@ -146,6 +146,11 @@ jobs:
         # If `packages:` above is set to `read`, GITHUB_TOKEN gives this error:
         #    npm ERR! 403 403 Forbidden - PUT https://npm.pkg.github.com/@rockwell-automation-ftds%2fdependabot-test
         #      - Permission permission_denied: write_package
+        # The root of the problem may have been that for some reason, under the Package settings, section "Manage Action access",
+        # the list was empty. Clicked "Add Repository", add the repository was failing to publish, changed its role from Read to Write.
+        # In my personal packages, all the package settings lists the repo that publishes the package with the Role "Admin".
+        # Under the org, some package setting show no repo, some do, those that show a repo some with Role Admin, some with Role Read.
+        # Could those setting depend on the token used for publishing the first package?
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Release
